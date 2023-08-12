@@ -88,54 +88,74 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Generos
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            GeneroVO genero = new GeneroVO();
+
+            if (txtNombre.Text != "")
             {
                 try
                 {
-                    string nombre = txtNombre.Text;
-
-                    if (nombre != "")
-                    {                        
-                        GenerosBLL.InsGenero(nombre);
-                        Util.SweetBox("Correcto", "El Género ha sido Agregado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Nombre del Género no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    // Agregar
+                    genero.Nombre = txtNombre.Text;
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                }
+
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Generos(genero, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    genero.GeneroId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Generos(genero, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
                 }
             }
             else
             {
-                try
-                {
-                    string nombre = txtNombre.Text;
-
-                    if (nombre != "")
-                    {
-                        GeneroVO generoVO = GenerosBLL.GetGeneroById(int.Parse(Request.QueryString["Id"]));
-                        GenerosBLL.UdpGenero(generoVO.GeneroId, nombre);
-                        Util.SweetBox("Correcto", "El Género ha sido Actualizado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Nombre del Género no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
-                }
-                catch (Exception ex)
-                {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
-                }
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
             }
             
         }
+
+        private string Do_Generos(GeneroVO genero, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
+                try
+                {
+                    GenerosBLL.InsGenero(genero.Nombre);
+                    respuesta = "Género agregado con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+            else
+            {
+                // Actualizar
+                try
+                {
+                    GenerosBLL.UdpGenero(genero.GeneroId, genero.Nombre);
+                    respuesta = "Género actualizado con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+
+            return respuesta;
+        }
+
     }
 }

@@ -88,54 +88,74 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Lenguajes
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            LenguajeVO lenguaje = new LenguajeVO();
+
+            if (txtNombre.Text != "")
             {
                 try
                 {
-                    string nombre = txtNombre.Text;
-
-                    if (nombre != "")
-                    {                        
-                        LenguajesBLL.InsLenguaje(nombre);
-                        Util.SweetBox("Correcto", "El Lenguaje ha sido Agregado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Nombre del Lenguaje no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    // Agregar
+                    lenguaje.Nombre = txtNombre.Text;
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
                 }
 
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Lenguajes(lenguaje, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    lenguaje.LenguajeId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Lenguajes(lenguaje, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
             }
             else
             {
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
+            }
+
+        }
+
+        private string Do_Lenguajes(LenguajeVO lenguaje, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
                 try
                 {
-                    string nombre = txtNombre.Text;
-
-                    if (nombre != "")
-                    {
-                        LenguajeVO lenguajeVO = LenguajesBLL.GetLenguajeById(int.Parse(Request.QueryString["Id"]));
-                        LenguajesBLL.UdpLenguaje(lenguajeVO.LenguajeId, nombre);
-                        Util.SweetBox("Correcto", "El Lenguaje ha sido Actualizado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Nombre del Lenguaje no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    LenguajesBLL.InsLenguaje(lenguaje.Nombre);
+                    respuesta = "Lenguaje agregado con éxito";
                 }
                 catch (Exception ex)
                 {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                    respuesta = "Error: " + ex.Message;
                 }
             }
+            else
+            {
+                // Actualizar
+                try
+                {
+                    LenguajesBLL.UdpLenguaje(lenguaje.LenguajeId, lenguaje.Nombre);
+                    respuesta = "Lenguaje actualizado con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+
+            return respuesta;
         }
+
     }
 }

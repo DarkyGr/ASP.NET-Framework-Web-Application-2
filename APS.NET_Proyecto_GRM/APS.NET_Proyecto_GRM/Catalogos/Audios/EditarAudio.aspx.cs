@@ -88,55 +88,73 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Audios
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            AudioVO audio = new AudioVO();
+
+            if (txtFormato.Text != "")
             {
                 try
                 {
-                    string formato = txtFormato.Text;
-
-                    if (formato != "")
-                    {                        
-                        AudiosBLL.InsAudio(formato);
-                        Util.SweetBox("Correcto", "El Audio ha sido Agregado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Formato de Audio no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    // Agregar
+                    audio.Formato = txtFormato.Text;
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                }
+
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Audios(audio, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    audio.AudioId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Audios(audio, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
                 }
             }
             else
             {
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
+            }
+        }
+
+        private string Do_Audios(AudioVO audio, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
                 try
                 {
-                    string formato = txtFormato.Text;
-
-                    if (formato != "")
-                    {
-                        AudioVO audioVO = AudiosBLL.GetAudioById(int.Parse(Request.QueryString["Id"]));
-                        AudiosBLL.UdpAudio(audioVO.AudioId, formato);
-                        Util.SweetBox("Correcto", "El Audio ha sido Actualizado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "El campo Formato de Audio no puede quedar vacío!", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    AudiosBLL.InsAudio(audio.Formato);
+                    respuesta = "Audio agregado con éxito";
                 }
                 catch (Exception ex)
                 {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                    respuesta = "Error: " + ex.Message;
                 }
-
+            }
+            else
+            {
+                // Actualizar
+                try
+                {
+                    AudiosBLL.UdpAudio(audio.AudioId, audio.Formato);
+                    respuesta = "Aduio actualizado con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
             }
 
+            return respuesta;
         }
+
     }
 }
