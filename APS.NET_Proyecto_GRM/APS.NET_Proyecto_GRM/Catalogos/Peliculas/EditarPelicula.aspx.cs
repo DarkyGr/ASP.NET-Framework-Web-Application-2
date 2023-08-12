@@ -23,14 +23,8 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
                     //Response.Redirect("ListarPeliculas.aspx");
                     Titulo.Text = "Agregar Película";
                     Subtitulo.Text = "Registro de una nueva Película";
-                    ListItem i;
-
-                    // DDL Genero Id
-                    foreach (GeneroVO genero in GenerosBLL.GetListGeneros())
-                    {
-                        i = new ListItem(genero.Nombre, genero.GeneroId.ToString());
-                        ddlGeneroId.Items.Add(i);
-                    }
+                    
+                    CargarDDL();
                 }
                 else    // Si existe el Id
                 {
@@ -45,20 +39,14 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
                     if (pelicula.PeliculaId != 0)
                     {
                         // Asginamos
-                        ListItem i;
-
-                        // DDL Genero Id
-                        foreach (GeneroVO genero in GenerosBLL.GetListGeneros())
-                        {
-                            i = new ListItem(genero.Nombre, genero.GeneroId.ToString());
-                            ddlGeneroId.Items.Add(i);
-                        }
-                        ddlGeneroId.SelectedValue = pelicula.GeneroId.ToString();
+                        CargarDDL();
 
                         this.txtNombre.Text = pelicula.Nombre;
                         this.txtDuracionHoras.Text = pelicula.DuracionHoras.ToString();
                         this.txtFechaLanzamiento.Text = pelicula.FechaLanzamiento.ToString();
                         this.txtImdb.Text = pelicula.Imdb;
+
+                        ddlGeneroId.SelectedValue = pelicula.GeneroId.ToString();
                     }
                     else
                     {
@@ -68,6 +56,19 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
                     }
                 }
             }
+        }
+
+        private void CargarDDL()
+        {
+            #region Genero
+            ListItem ddlG = new ListItem("Seleccione un género", "0");
+            ddlGeneroId.Items.Add(ddlG);
+            foreach (GeneroVO genero in GenerosBLL.GetListGeneros())
+            {
+                ListItem i = new ListItem(genero.Nombre, genero.GeneroId.ToString());
+                ddlGeneroId.Items.Add(i);
+            }
+            #endregion
         }
 
         //protected void btnSubeImagen_Click(object sender, EventArgs e)
@@ -110,61 +111,76 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            PeliculaVO pelicula = new PeliculaVO();
+
+            if (int.Parse(ddlGeneroId.Text) != 0 && txtNombre.Text != "" && float.Parse(txtDuracionHoras.Text) != 0 && txtFechaLanzamiento.Text != "" && txtImdb.Text != "")
             {
                 try
                 {
-                    int generoId = int.Parse(ddlGeneroId.SelectedItem.Value);
-                    string nombre = txtNombre.Text;
-                    float duracionHoras = float.Parse(txtDuracionHoras.Text);
-                    string fechaLanzamiento = txtFechaLanzamiento.Text;
-                    string imdb = txtImdb.Text;
-
-                    if (generoId != 0 && nombre != "" && duracionHoras != 0 && fechaLanzamiento != "" && imdb != "")
-                    {                        
-                        PeliculasBLL.InsPelicula(generoId, nombre, duracionHoras, DateTime.Parse(fechaLanzamiento), imdb);
-                        Util.SweetBox("Correcto", "La Película ha sido Agregada con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Ninguno de los campos puede estar vacío.", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    // Agregar
+                    pelicula.GeneroId = int.Parse(ddlGeneroId.SelectedValue);
+                    pelicula.Nombre = txtNombre.Text;
+                    pelicula.DuracionHoras = float.Parse(txtDuracionHoras.Text);
+                    pelicula.Imdb = txtImdb.Text;
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                }
+
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Peliculas(pelicula, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    pelicula.PeliculaId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Peliculas(pelicula, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
                 }
             }
             else
             {
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
+            }
+        }
+
+        private string Do_Peliculas(PeliculaVO pelicula, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
                 try
                 {
-                    int generoId = int.Parse(ddlGeneroId.SelectedItem.Value);
-                    string nombre = txtNombre.Text;
-                    float duracionHoras = float.Parse(txtDuracionHoras.Text);
-                    string fechaLanzamiento = txtFechaLanzamiento.Text;
-                    string imdb = txtImdb.Text;
-
-                    if (generoId != 0 && nombre != "" && duracionHoras != 0 && fechaLanzamiento != "" && imdb != "")
-                    {
-                        PeliculaVO peliculaVO = PeliculasBLL.GetPeliculaById(int.Parse(Request.QueryString["Id"]));
-                        PeliculasBLL.UdpPelicula(peliculaVO.PeliculaId, generoId, nombre, duracionHoras, DateTime.Parse(fechaLanzamiento), imdb);
-                        Util.SweetBox("Correcto", "La Película ha sido Actualizada con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Ninguno de los campos puede estar vacío.", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    PeliculasBLL.InsPelicula(pelicula.GeneroId, pelicula.Nombre, pelicula.DuracionHoras, pelicula.FechaLanzamiento, pelicula.Imdb);
+                    respuesta = "Película agregada con éxito";
                 }
                 catch (Exception ex)
                 {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                    respuesta = "Error: " + ex.Message;
                 }
-            }            
+            }
+            else
+            {
+                // Actualizar
+                try
+                {
+                    PeliculasBLL.UdpPelicula(pelicula.PeliculaId, pelicula.GeneroId, pelicula.Nombre, pelicula.DuracionHoras, pelicula.FechaLanzamiento, pelicula.Imdb);
+                    respuesta = "Película actualizada con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+
+            return respuesta;
         }
+
     }
 }

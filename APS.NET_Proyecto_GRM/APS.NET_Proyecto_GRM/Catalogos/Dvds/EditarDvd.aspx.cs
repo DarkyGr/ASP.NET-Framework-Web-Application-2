@@ -2,6 +2,7 @@
 using Capa_BLL;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Web;
@@ -23,29 +24,8 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
                     //Response.Redirect("ListarDvds.aspx");
                     Titulo.Text = "Agregar DVD";
                     Subtitulo.Text = "Registro de un nuevo DVD";
-                    ListItem i;
 
-                    // DDL Pelicula Id
-                    foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
-                    {                        
-                        i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
-                        ddlPeliculaId.Items.Add(i);
-                    }
-                    //ddlPeliculaId.SelectedItem.Text = "Seleccione uno de la lista";
-
-                    // DDL Lenguaje Id
-                    foreach (LenguajeVO lenguaje in LenguajesBLL.GetListLenguajes())
-                    {                        
-                        i = new ListItem(lenguaje.Nombre, lenguaje.LenguajeId.ToString());
-                        ddlLenguajeId.Items.Add(i);
-                    }
-
-                    // DDL Audio Id
-                    foreach (AudioVO audio in AudiosBLL.GetListAudios())
-                    {                        
-                        i = new ListItem(audio.Formato, audio.AudioId.ToString());
-                        ddlAudioId.Items.Add(i);
-                    }
+                    CargarDDL();                    
                 }
                 else    // Si existe el Id
                 {
@@ -60,7 +40,8 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
                     if (dvd.DvdId != 0)
                     {
                         // Asginamos
-                        ListItem i;
+                        CargarDDL();
+
                         this.txtIsbn.Text = dvd.Isbn;
                         this.txtEdicion.Text = dvd.Edicion;
                         this.txtFormatoPantalla.Text = dvd.FormatoPantalla;
@@ -69,29 +50,9 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
 
                         this.imgPortadaVieja.ImageUrl = dvd.UrlFoto;
                         this.lblPortadaVieja.Text = dvd.UrlFoto;
-
-                        // DDL Pelicula Id
-                        foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
-                        {                            
-                            i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
-                            ddlPeliculaId.Items.Add(i);
-                        }
+                        
                         ddlPeliculaId.SelectedValue = dvd.PeliculaId.ToString();
-
-                        // DDL Lenguaje Id
-                        foreach (LenguajeVO lenguaje in LenguajesBLL.GetListLenguajes())
-                        {                            
-                            i = new ListItem(lenguaje.Nombre, lenguaje.LenguajeId.ToString());
-                            ddlLenguajeId.Items.Add(i);
-                        }
                         ddlLenguajeId.SelectedValue = dvd.LenguajeId.ToString();
-
-                        // DDL Audio Id
-                        foreach (AudioVO audio in AudiosBLL.GetListAudios())
-                        {                            
-                            i = new ListItem(audio.Formato, audio.AudioId.ToString());
-                            ddlAudioId.Items.Add(i);
-                        }
                         ddlAudioId.SelectedValue = dvd.AudioId.ToString();
                     }
                     else
@@ -102,6 +63,39 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
                     }
                 }
             }
+        }
+
+        private void CargarDDL()
+        {
+            #region Pelicula
+            ListItem ddlP = new ListItem("Seleccione una película", "0");
+            ddlPeliculaId.Items.Add(ddlP);
+            foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
+            {
+                ListItem i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
+                ddlPeliculaId.Items.Add(i);
+            }
+            #endregion
+
+            #region Lenguaje
+            ListItem ddlL = new ListItem("Seleccione un lenguaje", "0");
+            ddlLenguajeId.Items.Add(ddlL);
+            foreach (LenguajeVO lenguaje in LenguajesBLL.GetListLenguajes())
+            {
+                ListItem i = new ListItem(lenguaje.Nombre, lenguaje.LenguajeId.ToString());
+                ddlLenguajeId.Items.Add(i);
+            }
+            #endregion
+
+            #region Audio
+            ListItem ddlA = new ListItem("Seleccione un Formato", "0");
+            ddlAudioId.Items.Add(ddlA);
+            foreach (AudioVO audio in AudiosBLL.GetListAudios())
+            {
+                ListItem i = new ListItem(audio.Formato, audio.AudioId.ToString());
+                ddlAudioId.Items.Add(i);
+            }
+            #endregion
         }
 
         protected void btnSubeImagen_Click(object sender, EventArgs e)
@@ -144,67 +138,80 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            DvdVO dvd = new DvdVO();
+
+            if (int.Parse(ddlPeliculaId.Text) != 0 && int.Parse(ddlLenguajeId.Text) != 0 && int.Parse(ddlAudioId.Text) != 0 && txtIsbn.Text != "" && txtFechaSalida.Text != "")
             {
                 try
                 {
-                    int peliculaId = int.Parse(ddlPeliculaId.SelectedItem.Value);
-                    int lenguajeId = int.Parse(ddlLenguajeId.SelectedItem.Value);
-                    int audioId = int.Parse(ddlAudioId.SelectedItem.Value);
-                    string isbn = txtIsbn.Text;
-                    string edicion = txtEdicion.Text;
-                    string formatoPantalla = txtFormatoPantalla.Text;
-                    string region = txtRegion.Text;
-                    string fechaSalida = txtFechaSalida.Text;
-                    string urlFoto = lblPortadaNueva.Text;
-
-                    if (peliculaId != 0 && lenguajeId != 0 && audioId != 0 && isbn != "" && fechaSalida != "")
-                    {
-                        DvdsBLL.InsDvd(peliculaId, lenguajeId, audioId, isbn, edicion, formatoPantalla, region, DateTime.Parse(fechaSalida), urlFoto);
-                        Util.SweetBox("Correcto", "El DVD ha sido Agregado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Los campos Nombre de Película, Lenguaje, Formato de Audio, Isbn y Fecha de Lanzamiento no pueden estar vacíos.", "warning", this.Page, this.GetType());
-                    }
+                    // Agregar
+                    dvd.PeliculaId = int.Parse(ddlPeliculaId.SelectedValue);
+                    dvd.LenguajeId = int.Parse(ddlLenguajeId.SelectedValue);
+                    dvd.AudioId = int.Parse(ddlAudioId.SelectedValue);
+                    dvd.Isbn = txtIsbn.Text;
+                    dvd.Edicion = txtEdicion.Text;
+                    dvd.FormatoPantalla = txtFormatoPantalla.Text;
+                    dvd.Region = txtRegion.Text;
+                    dvd.FechaSalida = DateTime.Parse(txtFechaSalida.Text);
+                    dvd.UrlFoto = lblPortadaNueva.Text;
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                }
+
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Dvds(dvd, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    dvd.DvdId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Dvds(dvd, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
                 }
             }
             else
             {
+                Util.SweetBox("Advertencia", "Los campos Nombre de Película, Lenguaje, Formato de Audio, Isbn y Fecha de Lanzamiento no pueden estar vacíos.", "warning", this.Page, this.GetType());
+            }
+        }
+
+        private string Do_Dvds(DvdVO dvd, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
                 try
                 {
-                    int peliculaId = int.Parse(ddlPeliculaId.SelectedItem.Value);
-                    int lenguajeId = int.Parse(ddlLenguajeId.SelectedItem.Value);
-                    int audioId = int.Parse(ddlAudioId.SelectedItem.Value);
-                    string isbn = txtIsbn.Text;
-                    string edicion = txtEdicion.Text;
-                    string formatoPantalla = txtFormatoPantalla.Text;
-                    string region = txtRegion.Text;
-                    string fechaSalida = txtFechaSalida.Text;
-                    string urlFoto = lblPortadaNueva.Text;
-
-                    if (peliculaId != 0 && lenguajeId != 0 && audioId != 0 && isbn != "" && fechaSalida != "")
-                    {
-                        DvdVO dvdVO = DvdsBLL.GetDvdById(int.Parse(Request.QueryString["Id"]));
-                        DvdsBLL.UdpDvd(dvdVO.DvdId, peliculaId, lenguajeId, audioId, isbn, edicion, formatoPantalla, region, DateTime.Parse(fechaSalida), urlFoto);
-                        Util.SweetBox("Correcto", "El DVD ha sido Actualizado con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Los campos Nombre de Película, Lenguaje, Formato de Audio, Isbn y Fecha de Lanzamiento no pueden estar vacíos.", "warning", this.Page, this.GetType());
-                    }
-                    //Response.Redirect("ListaChoferes.aspx");
+                    DvdsBLL.InsDvd(dvd.PeliculaId, dvd.LenguajeId, dvd.AudioId, dvd.Isbn, dvd.Edicion, dvd.FormatoPantalla, dvd.Region, dvd.FechaSalida, dvd.UrlFoto);
+                    respuesta = "DVD agregado con éxito";
                 }
                 catch (Exception ex)
                 {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+            else
+            {
+                // Actualizar
+                try
+                {
+                    DvdsBLL.UdpDvd(dvd.DvdId, dvd.PeliculaId, dvd.LenguajeId, dvd.AudioId, dvd.Isbn, dvd.Edicion, dvd.FormatoPantalla, dvd.Region, dvd.FechaSalida, dvd.UrlFoto);
+                    respuesta = "DVD actualizado con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
                 }
             }
 
+            return respuesta;
         }
     }
 }

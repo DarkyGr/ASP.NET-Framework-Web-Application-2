@@ -23,14 +23,8 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
                     //Response.Redirect("ListarPuntuaciones.aspx");
                     Titulo.Text = "Agregar Puntuación";
                     Subtitulo.Text = "Registro de una nueva Puntuación";
-                    ListItem i;
 
-                    // DDL Pelicula Id
-                    foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
-                    {
-                        i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
-                        ddlPeliculaId.Items.Add(i);
-                    }
+                    CargarDDL();
                 }
                 else    // Si existe el Id
                 {
@@ -45,14 +39,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
                     if (puntuacion.PuntuacionId != 0)
                     {
                         // Asginamos
-                        ListItem i;
-
-                        // DDL Pelicula Id
-                        foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
-                        {
-                            i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
-                            ddlPeliculaId.Items.Add(i);
-                        }
+                        CargarDDL();
                         ddlPeliculaId.SelectedValue = puntuacion.PeliculaId.ToString();
 
                         this.txtPlataforma.Text = puntuacion.Plataforma;
@@ -66,6 +53,19 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
                     }
                 }
             }
+        }
+
+        private void CargarDDL()
+        {
+            #region Pelicla
+            ListItem ddlP = new ListItem("Seleccione una película", "0");
+            ddlPeliculaId.Items.Add(ddlP);
+            foreach (PeliculaVO pelicula in PeliculasBLL.GetListPeliculas())
+            {
+                ListItem i = new ListItem(pelicula.Nombre, pelicula.PeliculaId.ToString());
+                ddlPeliculaId.Items.Add(i);
+            }
+            #endregion
         }
 
         //protected void btnSubeImagen_Click(object sender, EventArgs e)
@@ -108,58 +108,76 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
 
         protected void btnGuardar_Click(object sender, EventArgs e)
         {
-            if (Request.QueryString["Id"] == null)
+            PuntuacionVO puntuacion = new PuntuacionVO();
+
+            if (int.Parse(ddlPeliculaId.Text) != 0 && txtPlataforma.Text != "" && float.Parse(txtPuntuacion.Text) != 0)
             {
                 try
                 {
-                    int peliculaId = int.Parse(ddlPeliculaId.SelectedItem.Value);
-                    string plataforma = txtPlataforma.Text;
-                    float puntuacion = float.Parse(txtPuntuacion.Text);
-
-                    if (peliculaId != 0 && plataforma != "" && puntuacion > 0 && puntuacion <= 10)
-                    {                        
-                        PuntuacionesBLL.InsPuntuacion(peliculaId, plataforma, puntuacion);
-                        Util.SweetBox("Correcto", "La Puntuación ha sido Agregada con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Ninguno de los campos puede estar vacío y el campo Puntuación se califica del 1 al 10 con y sin decimales.", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    // Agregar
+                    puntuacion.PeliculaId = int.Parse(ddlPeliculaId.SelectedItem.Value);
+                    puntuacion.Plataforma = txtPlataforma.Text;
+                    puntuacion.Puntuacion = float.Parse(txtPuntuacion.Text);
                 }
                 catch (Exception ex)
                 {
                     Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                }
+
+                if (Request.QueryString["Id"] == null)
+                {
+                    // Estoy insertando
+                    string resultado = Do_Puntuaciones(puntuacion, true);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                }
+                else
+                {
+                    // Estoy Actualizando
+                    puntuacion.PuntuacionId = int.Parse(Request.QueryString["Id"]);
+                    string resultado = Do_Puntuaciones(puntuacion, false);
+                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
                 }
             }
             else
             {
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
+            }           
+            
+        }
+
+        private string Do_Puntuaciones(PuntuacionVO puntuacion, bool accion)
+        {
+            string respuesta;
+
+            if (accion)
+            {
+                // Agregar
                 try
                 {
-                    int peliculaId = int.Parse(ddlPeliculaId.SelectedItem.Value);
-                    string plataforma = txtPlataforma.Text;
-                    float puntuacion = float.Parse(txtPuntuacion.Text);
-
-                    if (peliculaId != 0 && plataforma != "" && puntuacion > 0 && puntuacion <= 10)
-                    {
-                        PuntuacionVO puntuacionVO = PuntuacionesBLL.GetPuntuacionById(int.Parse(Request.QueryString["Id"]));
-                        PuntuacionesBLL.UdpPuntuacion(puntuacionVO.PuntuacionId, peliculaId, plataforma, puntuacion);
-                        Util.SweetBox("Correcto", "La Puntuación ha sido Actualizada con Éxito!", "success", this.Page, this.GetType());
-                    }
-                    else
-                    {
-                        Util.SweetBox("Advertencia", "Ninguno de los campos puede estar vacío y el campo Puntuación se califica del 1 al 10 con y sin decimales.", "warning", this.Page, this.GetType());
-                    }
-
-                    //Response.Redirect("ListaChoferes.aspx");
+                    PuntuacionesBLL.InsPuntuacion(puntuacion.PeliculaId, puntuacion.Plataforma, puntuacion.Puntuacion);
+                    respuesta = "Puntuación agregada con éxito";
                 }
                 catch (Exception ex)
                 {
-                    Util.SweetBox("Error", ex.Message, "error", this.Page, this.GetType());
+                    respuesta = "Error: " + ex.Message;
                 }
             }
-            
+            else
+            {
+                // Actualizar
+                try
+                {
+                    PuntuacionesBLL.UdpPuntuacion(puntuacion.PuntuacionId, puntuacion.PeliculaId, puntuacion.Plataforma, puntuacion.Puntuacion);
+                    respuesta = "Puntuación actualizada con éxito";
+                }
+                catch (Exception ex)
+                {
+                    respuesta = "Error: " + ex.Message;
+                }
+            }
+
+            return respuesta;
         }
+
     }
 }
