@@ -142,7 +142,7 @@ namespace WS_Dvds
 
         // Eliminar
         [WebMethod]
-        public int EliminarLenguaje(int lenguajeId)
+        public string EliminarLenguaje(int lenguajeId)
         {
             try
             {
@@ -157,13 +157,13 @@ namespace WS_Dvds
                         cmd.ExecuteNonQuery();
                         conn.Close();
 
-                        return 1;
+                        return "Se elimino correctamente el lenguaje.";
                     }
                 }
             }
             catch (Exception ex)
             {
-                return 0;
+                return "NO se pudo eliminar el lenguaje porque se esta usando en uno o varios DVD.";
             }
         }
     }
