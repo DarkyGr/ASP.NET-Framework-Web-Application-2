@@ -41,6 +41,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
                         // Asginamos
                         CargarDDL();
                         ddlPeliculaId.SelectedValue = puntuacion.PeliculaId.ToString();
+                        ddlPeliculaId.Enabled = false;
 
                         this.txtPlataforma.Text = puntuacion.Plataforma;
                         this.txtPuntuacion.Text = puntuacion.Puntuacion.ToString();
@@ -110,7 +111,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
         {
             PuntuacionVO puntuacion = new PuntuacionVO();
 
-            if (int.Parse(ddlPeliculaId.Text) != 0 && txtPlataforma.Text != "" && float.Parse(txtPuntuacion.Text) != 0)
+            if (int.Parse(ddlPeliculaId.Text) != 0 && txtPlataforma.Text != "" && float.Parse(txtPuntuacion.Text) > 0 && float.Parse(txtPuntuacion.Text) <= 10)
             {
                 try
                 {
@@ -126,9 +127,40 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
 
                 if (Request.QueryString["Id"] == null)
                 {
-                    // Estoy insertando
-                    string resultado = Do_Puntuaciones(puntuacion, true);
-                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    // Estoy agregando
+
+                    // Ver si existe otro isbn con el mismo 
+                    bool flag = false;
+                    foreach (PeliculaVO peliculaVO in PeliculasBLL.GetListPeliculas())
+                    {
+                        if (peliculaVO.PeliculaId == puntuacion.PeliculaId)
+                        {
+                            flag = true;
+                        }
+                    }
+
+                    foreach (PuntuacionVO puntuaciones in PuntuacionesBLL.GetListPuntuaciones())
+                    {
+                        if (puntuaciones.Plataforma != puntuacion.Plataforma)
+                        {
+                            flag = false;
+                        }
+                        else
+                        {
+                            flag = true;
+                        }
+                    }
+
+                    // Si no existe se agrega
+                    if (!flag)
+                    {
+                        string resultado = Do_Puntuaciones(puntuacion, true);
+                        Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    }
+                    else
+                    {
+                        Util.SweetBox("Error", "Ya existe una Puntuación con la misma Película y Plataforma.", "error", this.Page, this.GetType());
+                    }
                 }
                 else
                 {
@@ -140,9 +172,9 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Puntuaciones
             }
             else
             {
-                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
-            }           
-            
+                Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío y Puntuación debe estar entre el rango de 1 a 10 (se aceptan decimales).", "warning", this.Page, this.GetType());
+            }
+
         }
 
         private string Do_Puntuaciones(PuntuacionVO puntuacion, bool accion)

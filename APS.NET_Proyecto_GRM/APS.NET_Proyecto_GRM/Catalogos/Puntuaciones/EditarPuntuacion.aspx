@@ -3,14 +3,13 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <%-- Encabezado de Editar --%>
-    <div class="container">
-        <div class="row">
-            <asp:Label ID="Titulo" runat="server" CssClass="text-center modal-title"></asp:Label>
-            <asp:Label ID="Subtitulo" runat="server" CssClass="text-center modal-title"></asp:Label>
-            <%--<h1>Editar Puntuacion</h1>
-            <h3>ID del Puntuacion: 
-                <asp:Label ID="Label1" runat="server" Text=""></asp:Label>
-            </h3>--%>
+    <div class="row">
+        <div class="card text-bg-dark">
+            <img src="/Recursos/wp-2.jpg" class="card-img" alt="...">
+            <div class="card-img-overlay text-center">
+                <h1 class="card-title"><asp:Label ID="Titulo" runat="server" CssClass="text-center modal-title"></asp:Label></h1>
+                <p class="card-text fw-bold"><asp:Label ID="Subtitulo" runat="server" CssClass="text-center modal-title"></asp:Label></p>
+            </div>
         </div>
     </div>
 
