@@ -39,28 +39,53 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Pelicula
 
         protected void GVPeliculas_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            string PeliculaId = GVPeliculas.DataKeys[e.RowIndex].Values["PeliculaId"].ToString();
-            string Resultado = PeliculasBLL.DelPelicula(int.Parse(PeliculaId));
-            string mensaje = "";
-            string sub = "";
-            string clase = "";
+            string peliculaId = GVPeliculas.DataKeys[e.RowIndex].Values["PeliculaId"].ToString();
+            bool flag = false; // True si existe una o varias puntuaciones de una pelicula y presnete en DVDs -- False si no hay            
 
-            switch (Resultado)
+            foreach (PuntuacionVO puntua in PuntuacionesBLL.GetListPuntuaciones())
             {
-                case "1":
-                    mensaje = "Película eliminada con EXITO!!";
-                    sub = "";
-                    clase = "success";
-                    break;
-
-                case "0":
-                    mensaje = "La Película NO puede ser eliminado";
-                    sub = "Pregunte con nuestro soporte tecnico";
-                    clase = "warning";
-                    break;
+                if (puntua.PeliculaId == int.Parse(peliculaId))
+                {
+                    flag = true;
+                }
             }
-            Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
-            RefrescarGrid();
+
+            foreach (DvdVO dvdd in DvdsBLL.GetListDvds())
+            {
+                if (dvdd.PeliculaId == int.Parse(peliculaId))
+                {
+                    flag = true;
+                }
+            }
+
+            if (!flag)
+            {
+                string Resultado = PeliculasBLL.DelPelicula(int.Parse(peliculaId));
+                string mensaje = "";
+                string sub = "";
+                string clase = "";
+
+                switch (Resultado)
+                {
+                    case "1":
+                        mensaje = "Película eliminada con ÉXITO!!";
+                        sub = "";
+                        clase = "success";
+                        break;
+
+                    case "0":
+                        mensaje = "La Película NO puede ser eliminado";
+                        sub = "Pregunte con nuestro soporte técnico";
+                        clase = "warning";
+                        break;
+                }
+                Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
+                RefrescarGrid();
+            }
+            else
+            {
+                Util.SweetBox("Error", "El Película no se puede eliminar porque se encuentra en una o varias Puntuaciones o en uno o varios DVDs.", "error", this.Page, this.GetType());
+            }
         }
 
         protected void GVPeliculas_RowCommand(object sender, GridViewCommandEventArgs e)

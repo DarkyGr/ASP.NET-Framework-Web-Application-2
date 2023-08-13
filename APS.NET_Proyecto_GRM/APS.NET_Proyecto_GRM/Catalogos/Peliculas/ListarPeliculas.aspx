@@ -10,7 +10,7 @@
                 <div class="card-img-overlay text-center">
                     <h1 class="card-title">Lista de Películas</h1>
                     <p class="card-text">Aquí encontrarás todas las Películas que se podrán convertir en formatos DVDs.</p>
-                    <p class="card-text"><small>**NOTA: Se podrá agregar y editar una película, pero si se desea eliminar, la película no debe estar presente en ningún DVD.</small></p>
+                    <p class="card-text"><small>**NOTA: Se podrá agregar y editar una película, pero si se desea eliminar, la película no debe estar presente en ningún DVD y Puntuación.</small></p>
                 </div>
             </div>
         </div>

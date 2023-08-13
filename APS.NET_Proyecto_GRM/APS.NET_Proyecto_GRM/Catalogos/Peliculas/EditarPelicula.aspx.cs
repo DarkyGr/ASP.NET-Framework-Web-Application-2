@@ -23,7 +23,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
                     //Response.Redirect("ListarPeliculas.aspx");
                     Titulo.Text = "Agregar Película";
                     Subtitulo.Text = "Registro de una nueva Película";
-                    
+
                     CargarDDL();
                 }
                 else    // Si existe el Id
@@ -47,6 +47,10 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
                         this.txtImdb.Text = pelicula.Imdb;
 
                         ddlGeneroId.SelectedValue = pelicula.GeneroId.ToString();
+                        
+                        this.txtNombre.Enabled = false;
+                        this.txtFechaLanzamiento.Enabled = false;
+                        this.txtImdb.Enabled = false;
                     }
                     else
                     {
@@ -130,9 +134,28 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Peliculas
 
                 if (Request.QueryString["Id"] == null)
                 {
-                    // Estoy insertando
-                    string resultado = Do_Peliculas(pelicula, true);
-                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    // Estoy agregando
+
+                    // Ver si existe otro lenguaje con el mismo 
+                    bool flag = false;
+                    foreach (PeliculaVO peli in PeliculasBLL.GetListPeliculas())
+                    {
+                        if (peli.Nombre == pelicula.Nombre)
+                        {
+                            flag = true;
+                        }
+                    }
+
+                    // Si no existe se agrega
+                    if (!flag)
+                    {
+                        string resultado = Do_Peliculas(pelicula, true);
+                        Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    }
+                    else
+                    {
+                        Util.SweetBox("Error", "Ya existe una película con el mismo nombre.", "error", this.Page, this.GetType());
+                    }
                 }
                 else
                 {
