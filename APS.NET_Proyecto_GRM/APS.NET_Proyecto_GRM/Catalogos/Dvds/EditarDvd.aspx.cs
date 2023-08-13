@@ -25,7 +25,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
                     Titulo.Text = "Agregar DVD";
                     Subtitulo.Text = "Registro de un nuevo DVD";
 
-                    CargarDDL();                    
+                    CargarDDL();
                 }
                 else    // Si existe el Id
                 {
@@ -50,10 +50,16 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
 
                         this.imgPortadaVieja.ImageUrl = dvd.UrlFoto;
                         this.lblPortadaVieja.Text = dvd.UrlFoto;
-                        
+
                         ddlPeliculaId.SelectedValue = dvd.PeliculaId.ToString();
                         ddlLenguajeId.SelectedValue = dvd.LenguajeId.ToString();
                         ddlAudioId.SelectedValue = dvd.AudioId.ToString();
+
+                        this.txtIsbn.Enabled = false;
+                        this.txtFechaSalida.Enabled = false;
+                        ddlPeliculaId.Enabled = false;
+                        ddlLenguajeId.Enabled = false;
+                        ddlAudioId.Enabled = false;
                     }
                     else
                     {
@@ -162,9 +168,27 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Dvds
 
                 if (Request.QueryString["Id"] == null)
                 {
-                    // Estoy insertando
-                    string resultado = Do_Dvds(dvd, true);
-                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    // Estoy agregando
+
+                    // Ver si existe otro isbn con el mismo 
+                    bool flag = false;
+                    foreach (DvdVO dvdd in DvdsBLL.GetListDvds())
+                    {
+                        if (dvdd.Isbn == dvd.Isbn)
+                        {
+                            flag = true;
+                        }
+                    }
+                    // Si no existe se agrega
+                    if (!flag)
+                    {
+                        string resultado = Do_Dvds(dvd, true);
+                        Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    }
+                    else
+                    {
+                        Util.SweetBox("Error", "Ya existe un DVD con el mismo Isbn.", "error", this.Page, this.GetType());
+                    }
                 }
                 else
                 {

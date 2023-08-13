@@ -3,14 +3,13 @@
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
 
     <%-- Encabezado de Editar --%>
-    <div class="container">
-        <div class="row">
-            <asp:Label ID="Titulo" runat="server" CssClass="text-center modal-title"></asp:Label>
-            <asp:Label ID="Subtitulo" runat="server" CssClass="text-center modal-title"></asp:Label>
-            <%--<h1>Editar Dvd</h1>
-            <h3>ID del Dvd: 
-                <asp:Label ID="Label1" runat="server" Text=""></asp:Label>
-            </h3>--%>
+    <div class="row">
+        <div class="card text-bg-dark">
+            <img src="/Recursos/wp-2.jpg" class="card-img" alt="...">
+            <div class="card-img-overlay text-center">
+                <h1 class="card-title"><asp:Label ID="Titulo" runat="server" CssClass="text-center modal-title"></asp:Label></h1>
+                <p class="card-text fw-bold"><asp:Label ID="Subtitulo" runat="server" CssClass="text-center modal-title"></asp:Label></p>
+            </div>
         </div>
     </div>
 
@@ -44,7 +43,7 @@
                 <asp:Label ID="lblFechaSalida" runat="server" Text="">Fecha de Lanzamiento:</asp:Label>
                 <asp:TextBox ID="txtFechaSalida" runat="server" placeholder="mm/dd/aaaa" MaxLength="10" CssClass="form-control"></asp:TextBox>
 
-                <asp:Label ID="lblImagen" runat="server">Imagen</asp:Label>
+                <asp:Label ID="lblImagen" runat="server">Imagen(portada):</asp:Label>
                 <input type="file" id="SubeImagen" runat="server" class="btn btn-file">
                 <asp:Button ID="btnSubeImagen" runat="server" CssClass="btn btn-primary" Text="Subir Imagen" OnClick="btnSubeImagen_Click"/><br /><br />
 
