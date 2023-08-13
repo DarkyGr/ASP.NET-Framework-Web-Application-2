@@ -39,28 +39,45 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Lenguajes
 
         protected void GVLenguajes_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            string LenguajeId = GVLenguajes.DataKeys[e.RowIndex].Values["LenguajeId"].ToString();
-            string Resultado = LenguajesBLL.DelLenguaje(int.Parse(LenguajeId));
-            string mensaje = "";
-            string sub = "";
-            string clase = "";
+            string lenguajeId = GVLenguajes.DataKeys[e.RowIndex].Values["LenguajeId"].ToString();
+            bool flag = false; // True si existe un lenguaje en uno o varios DVDs -- False si no hay
 
-            switch (Resultado)
+            foreach (DvdVO dvd in DvdsBLL.GetListDvds())
             {
-                case "1":
-                    mensaje = "Lenguaje eliminado con EXITO!!";
-                    sub = "";
-                    clase = "success";
-                    break;
-
-                case "0":
-                    mensaje = "El Lenguaje NO puede ser eliminado";
-                    sub = "Pregunte con nuestro soporte tecnico";
-                    clase = "warning";
-                    break;
+                if(dvd.LenguajeId == int.Parse(lenguajeId))
+                {
+                    flag = true;
+                }
             }
-            Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
-            RefrescarGrid();
+
+            if (!flag)
+            {
+                string Resultado = LenguajesBLL.DelLenguaje(int.Parse(lenguajeId));
+                string mensaje = "";
+                string sub = "";
+                string clase = "";
+
+                switch (Resultado)
+                {
+                    case "1":
+                        mensaje = "Lenguaje eliminado con ÉXITO!!";
+                        sub = "";
+                        clase = "success";
+                        break;
+
+                    case "0":
+                        mensaje = "El Lenguaje NO puede ser eliminado";
+                        sub = "Pregunte con nuestro soporte técnico";
+                        clase = "warning";
+                        break;
+                }
+                Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
+                RefrescarGrid();
+            }
+            else
+            {
+                Util.SweetBox("Error", "El Lenguaje no se puede eliminar porque se encuentra en uno o varios DVD.", "error", this.Page, this.GetType());
+            }
         }
 
         protected void GVLenguajes_RowCommand(object sender, GridViewCommandEventArgs e)

@@ -36,7 +36,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Lenguajes
                     if (lenguaje.LenguajeId != 0)
                     {
                         // Asginamos                        
-                        this.txtNombre.Text = lenguaje.Nombre;                        
+                        this.txtNombre.Text = lenguaje.Nombre;
                     }
                     else
                     {
@@ -104,9 +104,28 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Lenguajes
 
                 if (Request.QueryString["Id"] == null)
                 {
-                    // Estoy insertando
-                    string resultado = Do_Lenguajes(lenguaje, true);
-                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    // Estoy agregando
+
+                    // Ver si existe otro lenguaje con el mismo 
+                    bool flag = false;
+                    foreach (LenguajeVO len in LenguajesBLL.GetListLenguajes())
+                    {
+                        if (len.Nombre == lenguaje.Nombre)
+                        {
+                            flag = true;
+                        }
+                    }
+
+                    // Si no existe se agrega
+                    if (!flag)
+                    {
+                        string resultado = Do_Lenguajes(lenguaje, true);
+                        Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    }
+                    else
+                    {
+                        Util.SweetBox("Error", "Ya existe un lenguaje con el mismo nombre.", "error", this.Page, this.GetType());
+                    }
                 }
                 else
                 {
