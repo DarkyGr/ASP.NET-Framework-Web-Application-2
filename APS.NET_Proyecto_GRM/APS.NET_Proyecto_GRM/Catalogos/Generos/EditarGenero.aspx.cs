@@ -104,9 +104,28 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Generos
 
                 if (Request.QueryString["Id"] == null)
                 {
-                    // Estoy insertando
-                    string resultado = Do_Generos(genero, true);
-                    Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    // Estoy agregando
+
+                    // Ver si existe otro lenguaje con el mismo 
+                    bool flag = false;
+                    foreach (GeneroVO gen in GenerosBLL.GetListGeneros())
+                    {
+                        if (gen.Nombre == genero.Nombre)
+                        {
+                            flag = true;
+                        }
+                    }
+
+                    // Si no existe se agrega
+                    if (!flag)
+                    {
+                        string resultado = Do_Generos(genero, true);
+                        Util.SweetBox("Correcto", resultado, "success", this.Page, this.GetType());
+                    }
+                    else
+                    {
+                        Util.SweetBox("Error", "Ya existe un género con el mismo nombre.", "error", this.Page, this.GetType());
+                    }
                 }
                 else
                 {
@@ -120,7 +139,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Generos
             {
                 Util.SweetBox("Advertencia", "Ningún campo puede quedar vacío.", "warning", this.Page, this.GetType());
             }
-            
+
         }
 
         private string Do_Generos(GeneroVO genero, bool accion)

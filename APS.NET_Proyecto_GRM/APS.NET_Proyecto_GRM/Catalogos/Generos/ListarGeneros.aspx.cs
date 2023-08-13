@@ -39,28 +39,45 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Generos
 
         protected void GVGeneros_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            string GeneroId = GVGeneros.DataKeys[e.RowIndex].Values["GeneroId"].ToString();
-            string Resultado = GenerosBLL.DelGenero(int.Parse(GeneroId));
-            string mensaje = "";
-            string sub = "";
-            string clase = "";
+            string generoId = GVGeneros.DataKeys[e.RowIndex].Values["GeneroId"].ToString();
+            bool flag = false; // True si existe un lenguaje en uno o varios DVDs -- False si no hay
 
-            switch (Resultado)
+            foreach (PeliculaVO peli in PeliculasBLL.GetListPeliculas())
             {
-                case "1":
-                    mensaje = "Genero eliminado con EXITO!!";
-                    sub = "";
-                    clase = "success";
-                    break;
-
-                case "0":
-                    mensaje = "El Genero NO puede ser eliminado";
-                    sub = "Pregunte con nuestro soporte tecnico";
-                    clase = "warning";
-                    break;
+                if (peli.GeneroId == int.Parse(generoId))
+                {
+                    flag = true;
+                }
             }
-            Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
-            RefrescarGrid();
+
+            if (!flag)
+            {
+                string Resultado = GenerosBLL.DelGenero(int.Parse(generoId));
+                string mensaje = "";
+                string sub = "";
+                string clase = "";
+
+                switch (Resultado)
+                {
+                    case "1":
+                        mensaje = "Genero eliminado con ÉXITO!!";
+                        sub = "";
+                        clase = "success";
+                        break;
+
+                    case "0":
+                        mensaje = "El Género NO puede ser eliminado";
+                        sub = "Pregunte con nuestro soporte técnico";
+                        clase = "warning";
+                        break;
+                }
+                Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
+                RefrescarGrid();
+            }
+            else
+            {
+                Util.SweetBox("Error", "El Audio no se puede eliminar porque se encuentra en una o varias Películas.", "error", this.Page, this.GetType());
+            }
         }
 
         protected void GVGeneros_RowCommand(object sender, GridViewCommandEventArgs e)
