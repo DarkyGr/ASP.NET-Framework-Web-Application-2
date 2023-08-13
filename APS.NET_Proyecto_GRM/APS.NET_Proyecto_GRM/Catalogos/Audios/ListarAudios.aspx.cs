@@ -39,28 +39,45 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Audios
 
         protected void GVAudios_RowDeleting(object sender, GridViewDeleteEventArgs e)
         {
-            string AudioId = GVAudios.DataKeys[e.RowIndex].Values["AudioId"].ToString();
-            string Resultado = AudiosBLL.DelAudio(int.Parse(AudioId));
-            string mensaje = "";
-            string sub = "";
-            string clase = "";
+            string audioId = GVAudios.DataKeys[e.RowIndex].Values["AudioId"].ToString();
+            bool flag = false; // True si existe un audio en uno o varios DVDs -- False si no hay
 
-            switch (Resultado)
+            foreach (DvdVO dvd in DvdsBLL.GetListDvds())
             {
-                case "1":
-                    mensaje = "Audio eliminado con EXITO!!";
-                    sub = "";
-                    clase = "success";
-                    break;
-
-                case "0":
-                    mensaje = "El Audio NO puede ser eliminado";
-                    sub = "Pregunte con nuestro soporte tecnico";
-                    clase = "warning";
-                    break;
+                if (dvd.AudioId == int.Parse(audioId))
+                {
+                    flag = true;
+                }
             }
-            Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
-            RefrescarGrid();
+
+            if (!flag)
+            {
+                string Resultado = AudiosBLL.DelAudio(int.Parse(audioId));
+                string mensaje = "";
+                string sub = "";
+                string clase = "";
+
+                switch (Resultado)
+                {
+                    case "1":
+                        mensaje = "Audio eliminado con ÉXITO!!";
+                        sub = "";
+                        clase = "success";
+                        break;
+
+                    case "0":
+                        mensaje = "El Audio NO puede ser eliminado";
+                        sub = "Pregunte con nuestro soporte técnico";
+                        clase = "warning";
+                        break;
+                }
+                Util.SweetBox(mensaje, sub, clase, this.Page, this.GetType());
+                RefrescarGrid();
+            }
+            else
+            {
+                Util.SweetBox("Error", "El Audio no se puede eliminar porque se encuentra en uno o varios DVD.", "error", this.Page, this.GetType());
+            }
         }
 
         protected void GVAudios_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -88,7 +105,7 @@ namespace APS.NET_Proyecto_GRM.Catalogos.Audios
         protected void GVAudios_RowUpdating(object sender, GridViewUpdateEventArgs e)
         {
             string audioId = GVAudios.DataKeys[e.RowIndex].Values["AudioId"].ToString();
-            string formato = e.NewValues["Formato"].ToString();            
+            string formato = e.NewValues["Formato"].ToString();
 
             AudioVO audioVO = AudiosBLL.GetAudioById(int.Parse(audioId));
             AudiosBLL.UdpAudio(int.Parse(audioId), formato);
